@@ -1,4 +1,5 @@
 App
+- Console app
 - consumes CSV file to generate SQLite *.db file for consumption
 
 
