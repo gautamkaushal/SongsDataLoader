@@ -96,7 +96,7 @@ public class DataLoader
                 }
                 this.repository.BulkInsert<Song>(songs);
                 this.repository.SaveChanges();
-                this.logger.LogInformation($"******{j++}******");
+                this.logger.LogInformation($"******{j++}******"); 
                 i = 0;
             };
             this.logger.LogInformation($"******Exiting parse and load******");
