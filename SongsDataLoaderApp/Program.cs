@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 IConfiguration configuration = 
@@ -48,6 +49,8 @@ using (var context = host.Services.GetRequiredService<SongsLoaderContext>()){
     DataLoaderOptions options = new DataLoaderOptions();
     configuration.GetSection(DataLoaderOptions.LoaderSettings).Bind(options);
     dataLoader.ParseAndLoadSongs(options.FilePath, options.BatchSize);
+    ILogger logger = host.Services.GetRequiredService<ILogger>();
+    logger.LogInformation("******Exiting");
 }
 
 host.RunAsync();

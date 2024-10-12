@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic.FileIO;
 using SongsDataLoaderApp.Models;
 
@@ -7,13 +8,15 @@ namespace SongsDataLoaderApp.Infrastructure;
 public class DataLoader
 {
     private Repository repository;
+    private readonly ILogger<DataLoader> logger;
 
-    public DataLoader(Repository repository)
+    public DataLoader(Repository repository, ILogger<DataLoader> logger)
     {
         this.repository = repository;
+        this.logger = logger;
     }
 
-    public void ParseAndLoadSongs(string filePath, int batchSize=999)
+    public void ParseAndLoadSongs(string filePath, int batchSize = 999)
     {
         using (TextFieldParser parser = new TextFieldParser(filePath))
         {
@@ -24,7 +27,7 @@ public class DataLoader
             ICollection<Album> albums = this.repository.GetAlbums();
             ICollection<Song> songs = this.repository.GetSongs();
             bool isFirstLine = true;
-            int i = 0;
+            int i = 0, j = 0;
             while (!parser.EndOfData)
             {
                 while (i < batchSize)
@@ -93,8 +96,10 @@ public class DataLoader
                 }
                 this.repository.BulkInsert<Song>(songs);
                 this.repository.SaveChanges();
+                this.logger.LogInformation($"******{j++}******");
                 i = 0;
             };
+            this.logger.LogInformation($"******Exiting parse and load******");
         }
     }
 
