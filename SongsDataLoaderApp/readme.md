@@ -1,6 +1,7 @@
 App
 - Console app
 - consumes CSV file to generate SQLite *.db file for consumption
+- may want to delete the previous versions of the *.db file before every run
 
 
 To run
