@@ -20,6 +20,7 @@ public class DataLoader
     {
         using (TextFieldParser parser = new TextFieldParser(filePath))
         {
+            this.logger.LogInformation($"******Starting to parse and load******");
             parser.TextFieldType = FieldType.Delimited;
             parser.SetDelimiters(",");
             ICollection<Genre> genres = this.repository.GetGenres();
@@ -30,21 +31,32 @@ public class DataLoader
             int i = 0, j = 0;
             while (!parser.EndOfData)
             {
+                this.logger.LogTrace($"Reading for line # {i}");
+
                 while (i < batchSize)
                 {
+                    i++;
                     string[] fields = parser.ReadFields();
+                    this.logger.LogTrace($"Read all the fields for line # {i}");
                     if (isFirstLine)
                     {
+                        this.logger.LogTrace($"isFirstLine: {isFirstLine}, therefore ignoring");
                         isFirstLine = false;
                         continue;
                     }
                     if (fields == null || fields.Length <= 0)
                     {
+                        this.logger.LogTrace($"Read fields are NULL or of 0 length");
                         continue;
                     }
-                    Genre genre = null;
+                    Genre genre = null!;
                     string genreVal = fields[3];
-                    if (string.IsNullOrEmpty(genreVal)) continue;
+                    if (string.IsNullOrEmpty(genreVal))
+                    {
+                        this.logger.LogTrace($"Read genreVal is null or empty");
+                        continue;
+                    }
+                    this.logger.LogTrace($"Read genreVal: {genreVal}");
                     if (!genres.Any(g => g.Name == genreVal))
                     {
                         genre = this.repository.Add<Genre>(new Genre { Name = genreVal });
@@ -56,8 +68,14 @@ public class DataLoader
                         genre = genres.Single(a => a.Name == genreVal);
                     }
 
-                    Artist artist = null;
+                    Artist artist = null!;
                     string artistVal = fields[1];
+                    if (string.IsNullOrEmpty(artistVal))
+                    {
+                        this.logger.LogTrace($"Read artistVal is null or empty");
+                        continue;
+                    }
+                    this.logger.LogTrace($"Read artistVal: {artistVal}");
                     if (!artists.Any(a => a.Name == artistVal))
                     {
                         artist = this.repository.Add<Artist>(new Artist { Name = artistVal });
@@ -69,8 +87,14 @@ public class DataLoader
                         artist = artists.Single(a => a.Name == artistVal);
                     }
 
-                    Album album = null;
+                    Album album = null!;
                     string albumVal = fields[2];
+                    if (string.IsNullOrEmpty(albumVal))
+                    {
+                        this.logger.LogTrace($"Read albumVal is null or empty");
+                        continue;
+                    }
+                    this.logger.LogTrace($"Read albumVal: {albumVal}");
                     if (!albums.Any(a => a.Name == albumVal))
                     {
                         album = this.repository.Add<Album>(new Album { Name = albumVal });
@@ -82,6 +106,15 @@ public class DataLoader
                         album = albums.Single(a => a.Name == albumVal);
                     }
 
+                    string songTitle = fields[0];
+                    string songTimespan = fields[4];
+                    if (string.IsNullOrEmpty(songTitle) || string.IsNullOrEmpty(songTimespan))
+                    {
+                        this.logger.LogTrace($"Read songTitle or songTimespan is null or empty");
+                        continue;
+                    }
+                    this.logger.LogTrace($"Read songTitle: {songTitle}");
+                    this.logger.LogTrace($"Read songTimespan: {songTimespan}");
                     Song song = this.repository.Add<Song>(
                         new Song
                         {
@@ -92,11 +125,10 @@ public class DataLoader
                             Album = album
                         });
                     songs.Add(song);
-                    i++;
                 }
                 this.repository.BulkInsert<Song>(songs);
                 this.repository.SaveChanges();
-                this.logger.LogInformation($"******{j++}******"); 
+                this.logger.LogInformation($"******{j++}******");
                 i = 0;
             };
             this.logger.LogInformation($"******Exiting parse and load******");

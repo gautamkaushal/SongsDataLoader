@@ -48,8 +48,11 @@ using (var context = host.Services.GetRequiredService<SongsLoaderContext>()){
     dataLoader.LoadReferenceData();
     DataLoaderOptions options = new DataLoaderOptions();
     configuration.GetSection(DataLoaderOptions.LoaderSettings).Bind(options);
+    using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+    ILogger logger = factory.CreateLogger("Program");
+    
+    logger.LogInformation($"******Starting the process******");
     dataLoader.ParseAndLoadSongs(options.FilePath, options.BatchSize);
-    ILogger logger = host.Services.GetRequiredService<ILogger>();
     logger.LogInformation("******Exiting");
 }
 
